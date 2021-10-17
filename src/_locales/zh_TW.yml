@@ -36,6 +36,18 @@ advanced:
   message: 進階
 theme:
   message: 主題
+not_in_group:
+  message: 非组
+not_other_group:
+  message: 非别组
+enabled:
+  message: 启用
+disabled:
+  message: 禁用
+development:
+  message: 研发中
+offlineEnabled:
+  message: 支持离线
 main_color:
   message: 主色彩
 sub_color:

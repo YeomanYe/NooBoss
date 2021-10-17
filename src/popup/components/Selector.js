@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import styled, { css } from 'styled-components';
 import ExtensionBrief from './ExtensionBrief';
 import GroupBrief from './GroupBrief';
-import { GL, sendMessage } from '../../utils';
+import { GL, promisedGet, promisedSet, sendMessage } from '../../utils';
 import { Listy, Tiley, BigTiley, Cleary } from '../../icons';
 
 const SelectorDiv = styled.div`
@@ -39,6 +39,7 @@ const SelectorDiv = styled.div`
       margin-top: 0px;
     }
     button {
+      min-width: ${(props) => props.withControl === 'group' ? '70px' : '80px'};
       margin-top: -3px;
       margin-right: 8px;
     }
@@ -93,9 +94,9 @@ class Selector extends Component {
     };
   }
 
-  enable() {
+  enable(extensionIds = this.getFiltered()) {
     const stateHistory = {};
-    this.getFiltered().map((id) => {
+    extensionIds.map((id) => {
       const extension = this.props.extensions[id];
       if (!extension.enabled) {
         stateHistory[extension.id] = extension.enabled;
@@ -112,9 +113,9 @@ class Selector extends Component {
     this.addStateHistory(stateHistory);
   }
 
-  disable() {
+  disable(extensionIds = this.getFiltered()) {
     const stateHistory = {};
-    this.getFiltered().map((id) => {
+    extensionIds.map((id) => {
       const extension = this.props.extensions[id];
       if (extension.enabled) {
         stateHistory[extension.id] = extension.enabled;
@@ -129,6 +130,19 @@ class Selector extends Component {
       }
     });
     this.addStateHistory(stateHistory);
+  }
+  
+  async setHistoryList() {
+    const historyMap = await promisedGet('historyMap') || {};
+    const {
+      stateHistoryList = [],
+      redoStateHistoryList = []
+    } = this.state;
+    historyMap[this.props.id] = {
+      stateHistoryList,
+      redoStateHistoryList
+    };
+    await promisedSet('historyMap', historyMap);
   }
 
   undo() {
@@ -157,7 +171,7 @@ class Selector extends Component {
       });
       prevState.redoStateHistoryList.push(redoStateHistory);
       return prevState;
-    });
+    }, () => this.setHistoryList());
   }
 
   redo() {
@@ -186,7 +200,7 @@ class Selector extends Component {
       });
       prevState.stateHistoryList.push(stateHistory);
       return prevState;
-    });
+    }, () => this.setHistoryList());
   }
 
   addStateHistory(stateHistory) {
@@ -194,11 +208,18 @@ class Selector extends Component {
       prevState.stateHistoryList.push(stateHistory);
       prevState.redoStateHistoryList = [];
       return prevState;
-    });
+    }, () => this.setHistoryList());
   }
 
   getFiltered(type) {
     const extensions = this.props.extensions;
+    // 全部组的扩展id
+    const groupExts = new Set();
+    if (this.props.allGroup) {
+      this.props.allGroup.forEach((g) => {
+        g.appList.forEach((item) => groupExts.add(item));
+      });
+    }
     return Object.keys(extensions).filter((elem) => {
       const extension = extensions[elem];
       // There is a bug: Extensions[undefined] = { enabled: true }
@@ -239,6 +260,24 @@ class Selector extends Component {
             if (!extension.name.match(/^NooBoss-Group/)) {
               pass = false;
             }
+            break;
+          case 'not_other_group':
+              pass = !groupExts.has(extension.id) || this.props.selectedList.includes(extension.id);
+              break;
+          case 'not_in_group':
+            pass = !groupExts.has(extension.id);
+            break;
+          case 'development':
+            pass = extension.installType === browser.management.ExtensionInstallType.DEVELOPMENT;
+            break;
+          case 'offlineEnabled':
+            pass = extension.offlineEnabled;
+            break;
+          case 'enabled':
+            pass = extension.enabled;
+            break;
+          case 'disabled':
+            pass = !extension.enabled;
             break;
           default:
             if ((extension.type || '').indexOf(this.state.filterType) === -1) {
@@ -283,10 +322,16 @@ class Selector extends Component {
     sendMessage({ job: 'newGroup' });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.actionBar) {
       this.nameFilter.focus();
     }
+    const historyMap = await promisedGet('historyMap');
+    const {
+      stateHistoryList = [],
+      redoStateHistoryList = []
+    } = historyMap[this.props.id] || {}
+    this.setState({stateHistoryList, redoStateHistoryList});
   }
 
   render() {
@@ -384,18 +429,16 @@ class Selector extends Component {
       });
     let selectGroup;
     if (this.props.groupList) {
-      selectGroup = <option value='group'>{GL('group')}</option>;
+      selectGroup = [
+        <option value='group'>{GL('group')}</option>
+      ];
+    } else {
+      selectGroup = <option value='not_other_group'>{GL('not_other_group')}</option>;
     }
     let actionBar;
     if (this.props.actionBar) {
       let buttonEnable, buttonDisable, buttonUndo, buttonRedo, buttonNewGroup;
       if (this.props.withControl) {
-        buttonEnable = (
-          <button onClick={this.enable.bind(this)}>{GL('enable')}</button>
-        );
-        buttonDisable = (
-          <button onClick={this.disable.bind(this)}>{GL('disable')}</button>
-        );
         buttonUndo = (
           <button
             className={this.state.stateHistoryList.length > 0 ? '' : 'inActive'}
@@ -412,10 +455,25 @@ class Selector extends Component {
             {GL('redo')}
           </button>
         );
-        buttonNewGroup = (
-          <button onClick={this.newGroup.bind(this)}>{GL('new_group')}</button>
-        );
-      }
+        if (this.props.withControl === 'group') {
+          buttonEnable = (
+            <button onClick={() => this.enable(this.props.selectedList)}>{GL('enable')}</button>
+          );
+          buttonDisable = (
+            <button onClick={() => this.disable(this.props.selectedList)}>{GL('disable')}</button>
+          );
+        } else {
+          buttonEnable = (
+            <button onClick={this.enable.bind(this)}>{GL('enable')}</button>
+          );
+          buttonDisable = (
+            <button onClick={this.disable.bind(this)}>{GL('disable')}</button>
+          );
+          buttonNewGroup = (
+            <button onClick={this.newGroup.bind(this)}>{GL('new_group')}</button>
+          );
+        }
+      } 
       actionBar = (
         <div id='actionBar'>
           <select
@@ -426,6 +484,11 @@ class Selector extends Component {
             id='typeFilter'>
             <option value='all'>{GL('all')}</option>
             {selectGroup}
+            <option value='not_in_group'>{GL('not_in_group')}</option>
+            <option value='development'>{GL('development')}</option>
+            <option value='enabled'>{GL('enabled')}</option>
+            <option value='disabled'>{GL('disabled')}</option>
+            <option value='offlineEnabled'>{GL('offlineEnabled')}</option>
             <option value='app'>{GL('app')}</option>
             <option value='extension'>{GL('extension')}</option>
             <option value='theme'>{GL('theme')}</option>
@@ -534,7 +597,7 @@ class Selector extends Component {
       />
     );
     return (
-      <SelectorDiv zoom={this.props.zoom} viewMode={this.props.viewMode}>
+      <SelectorDiv zoom={this.props.zoom} viewMode={this.props.viewMode} withControl={this.props.withControl}>
         {actionBar}
         {view}
         {groupDiv}
@@ -545,5 +608,9 @@ class Selector extends Component {
     );
   }
 }
+
+Selector.defaultProps = {
+  id: 'Nooboss-All'
+};
 
 export default Selector;

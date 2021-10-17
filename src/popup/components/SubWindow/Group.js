@@ -187,7 +187,10 @@ class Group extends Component {
             actionBar={true}
             icons={this.props.icons}
             extensions={this.props.extensions}
+            allGroup={this.props.groupList}
             selectedList={group.appList}
+            id={group.id}
+            withControl={'group'}
             select={this.change.bind(this, 'selectExtension')}
           />
           <div id='padder' />
