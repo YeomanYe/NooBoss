@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import styled, { css } from 'styled-components';
 import ExtensionBrief from './ExtensionBrief';
 import GroupBrief from './GroupBrief';
-import { GL, promisedGet, promisedSet, sendMessage } from '../../utils';
+import { GL, promisedGetDB, promisedSetDB, sendMessage } from '../../utils';
 import { Listy, Tiley, BigTiley, Cleary } from '../../icons';
 
 const SelectorDiv = styled.div`
@@ -133,7 +133,7 @@ class Selector extends Component {
   }
   
   async setHistoryList() {
-    const historyMap = await promisedGet('historyMap') || {};
+    const historyMap = await promisedGetDB('historyMap') || {};
     const {
       stateHistoryList = [],
       redoStateHistoryList = []
@@ -142,7 +142,7 @@ class Selector extends Component {
       stateHistoryList,
       redoStateHistoryList
     };
-    await promisedSet('historyMap', historyMap);
+    await promisedSetDB('historyMap', historyMap);
   }
 
   undo() {
@@ -326,7 +326,7 @@ class Selector extends Component {
     if (this.props.actionBar) {
       this.nameFilter.focus();
     }
-    const historyMap = await promisedGet('historyMap');
+    const historyMap = await promisedGetDB('historyMap');
     const {
       stateHistoryList = [],
       redoStateHistoryList = []

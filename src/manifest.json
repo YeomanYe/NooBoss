@@ -1,29 +1,24 @@
 {
-  "manifest_version": 2,
-  "name": "__MSG_extension_name__",
-  "description": "__MSG_extension_description__",
-  "default_locale": "en",
-  "version": "0.1.9",
-  "options_page": "popup.html?page=options",
-  "browser_action": {
-		"default_icon": "images/icon_128.png",
-    "default_title": "NooBoss~",
-    "default_popup": "popup.html"
-  },
-  "icons": {
-		"128": "images/icon_128.png"
-  },
-  "background": {
-    "scripts":["js/background.js"]
-  },
-  "minimum_chrome_version": "42",
-  "permissions": [
-    "tabs",
-    "management",
-    "notifications",
-    "storage",
-    "unlimitedStorage",
-    "https://clients2.google.com/*",
-    "https://ainoob.com/*"
-  ]
+   "background": {
+      "scripts": ["js/background.js"]
+   },
+   "browser_action": {
+      "default_icon": "images/icon_128.png",
+      "default_popup": "popup.html",
+      "default_title": "NooBoss~"
+   },
+   "default_locale": "en",
+   "description": "__MSG_extension_description__",
+   "differential_fingerprint": "1.eb255099a7b1cb03c59d12cc3a67dca85f539db58d1aad1aaed3541f8474cbbb",
+   "icons": {
+      "128": "images/icon_128.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyr8UhC9xfnEfNsCCd0gJn9M7R/4a3TIiCZk//VFVvpz0ou6QBjxoMH8LwDShgCst4v/QpdAL5CASusClKy9pItPwbCGfauNj90lfr+DJ7Qsa2qYNn4h3FmAQfj+dTYYrePKPg/NLqul3EmhkQMoAsIPhlbqzlMP420mqTNECw+VS4hj0b5FX3iQ/H8y/pki/M/5TIFHzvoIdAjh7XPPYk96bohT9HC6cutDjTvJ00EZ4HmohcfNpx+JzvlM7EWszJjOkrPegtBqw/IdRyDIATatbFvJXNHpO0xcn0PmQqVLSNMm+OtN8mDW3XJaR32/XjWxRLNXHjy2H0c2miqb5BwIDAQAB",
+   "manifest_version": 2,
+   "minimum_chrome_version": "42",
+   "name": "__MSG_extension_name__",
+   "options_page": "popup.html?page=options",
+   "permissions": ["tabs", "management", "notifications", "storage", "unlimitedStorage", "https://clients2.google.com/*", "https://ainoob.com/*"],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.1.9"
 }
