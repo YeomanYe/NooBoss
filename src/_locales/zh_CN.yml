@@ -40,6 +40,10 @@ not_in_group:
   message: 非组
 not_other_group:
   message: 非别组
+in_current_group:
+  message: 本组
+not_in_current_group:
+  message: 非本组
 enabled:
   message: 启用
 disabled:

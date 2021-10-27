@@ -39,7 +39,8 @@ const SelectorDiv = styled.div`
       margin-top: 0px;
     }
     button {
-      min-width: ${(props) => props.withControl === 'group' ? '70px' : '80px'};
+      min-width: ${(props) =>
+        props.withControl === 'group' ? '70px' : '80px'};
       margin-top: -3px;
       margin-right: 8px;
     }
@@ -131,13 +132,10 @@ class Selector extends Component {
     });
     this.addStateHistory(stateHistory);
   }
-  
+
   async setHistoryList() {
-    const historyMap = await promisedGetDB('historyMap') || {};
-    const {
-      stateHistoryList = [],
-      redoStateHistoryList = []
-    } = this.state;
+    const historyMap = (await promisedGetDB('historyMap')) || {};
+    const { stateHistoryList = [], redoStateHistoryList = [] } = this.state;
     historyMap[this.props.id] = {
       stateHistoryList,
       redoStateHistoryList
@@ -146,69 +144,78 @@ class Selector extends Component {
   }
 
   undo() {
-    this.setState((prevState) => {
-      const stateHistory = prevState.stateHistoryList.pop() || {};
-      const redoStateHistory = {};
-      Object.keys(stateHistory).map((id) => {
-        switch (id) {
-          case 'groupList':
-            redoStateHistory.groupList = JSON.parse(
-              JSON.stringify(this.props.groupList)
-            );
-            sendMessage({
-              job: 'groupListUpdate',
-              groupList: stateHistory.groupList
-            });
-            break;
-          default:
-            redoStateHistory[id] = this.props.extensions[id].enabled;
-            sendMessage({
-              job: 'extensionToggle',
-              id,
-              enabled: stateHistory[id]
-            });
-        }
-      });
-      prevState.redoStateHistoryList.push(redoStateHistory);
-      return prevState;
-    }, () => this.setHistoryList());
+    this.setState(
+      (prevState) => {
+        const stateHistory = prevState.stateHistoryList.pop() || {};
+        const redoStateHistory = {};
+        Object.keys(stateHistory).map((id) => {
+          switch (id) {
+            case 'groupList':
+              redoStateHistory.groupList = JSON.parse(
+                JSON.stringify(this.props.groupList)
+              );
+              sendMessage({
+                job: 'groupListUpdate',
+                groupList: stateHistory.groupList
+              });
+              break;
+            default:
+              redoStateHistory[id] = this.props.extensions[id].enabled;
+              sendMessage({
+                job: 'extensionToggle',
+                id,
+                enabled: stateHistory[id]
+              });
+          }
+        });
+        prevState.redoStateHistoryList.push(redoStateHistory);
+        return prevState;
+      },
+      () => this.setHistoryList()
+    );
   }
 
   redo() {
-    this.setState((prevState) => {
-      const redoStateHistory = prevState.redoStateHistoryList.pop() || {};
-      const stateHistory = {};
-      Object.keys(redoStateHistory).map((id) => {
-        switch (id) {
-          case 'groupList':
-            stateHistory.groupList = JSON.parse(
-              JSON.stringify(this.props.groupList)
-            );
-            sendMessage({
-              job: 'groupListUpdate',
-              groupList: redoStateHistory.groupList
-            });
-            break;
-          default:
-            stateHistory[id] = this.props.extensions[id].enabled;
-            sendMessage({
-              job: 'extensionToggle',
-              id,
-              enabled: redoStateHistory[id]
-            });
-        }
-      });
-      prevState.stateHistoryList.push(stateHistory);
-      return prevState;
-    }, () => this.setHistoryList());
+    this.setState(
+      (prevState) => {
+        const redoStateHistory = prevState.redoStateHistoryList.pop() || {};
+        const stateHistory = {};
+        Object.keys(redoStateHistory).map((id) => {
+          switch (id) {
+            case 'groupList':
+              stateHistory.groupList = JSON.parse(
+                JSON.stringify(this.props.groupList)
+              );
+              sendMessage({
+                job: 'groupListUpdate',
+                groupList: redoStateHistory.groupList
+              });
+              break;
+            default:
+              stateHistory[id] = this.props.extensions[id].enabled;
+              sendMessage({
+                job: 'extensionToggle',
+                id,
+                enabled: redoStateHistory[id]
+              });
+          }
+        });
+        prevState.stateHistoryList.push(stateHistory);
+        return prevState;
+      },
+      () => this.setHistoryList()
+    );
   }
 
   addStateHistory(stateHistory) {
-    this.setState((prevState) => {
-      prevState.stateHistoryList.push(stateHistory);
-      prevState.redoStateHistoryList = [];
-      return prevState;
-    }, () => this.setHistoryList());
+    this.setState(
+      (prevState) => {
+        prevState.stateHistoryList.push(stateHistory);
+        prevState.redoStateHistoryList = [];
+        return prevState;
+      },
+      () => this.setHistoryList()
+    );
   }
 
   getFiltered(type) {
@@ -261,14 +268,24 @@ class Selector extends Component {
               pass = false;
             }
             break;
+          case 'in_current_group':
+            pass = this.props.selectedList.includes(extension.id);
+            break;
+          case 'not_in_current_group':
+            pass = !this.props.selectedList.includes(extension.id);
+            break;
           case 'not_other_group':
-              pass = !groupExts.has(extension.id) || this.props.selectedList.includes(extension.id);
-              break;
+            pass =
+              !groupExts.has(extension.id) ||
+              this.props.selectedList.includes(extension.id);
+            break;
           case 'not_in_group':
             pass = !groupExts.has(extension.id);
             break;
           case 'development':
-            pass = extension.installType === browser.management.ExtensionInstallType.DEVELOPMENT;
+            pass =
+              extension.installType ===
+              browser.management.ExtensionInstallType.DEVELOPMENT;
             break;
           case 'offlineEnabled':
             pass = extension.offlineEnabled;
@@ -326,12 +343,10 @@ class Selector extends Component {
     if (this.props.actionBar) {
       this.nameFilter.focus();
     }
-    const historyMap = await promisedGetDB('historyMap');
-    const {
-      stateHistoryList = [],
-      redoStateHistoryList = []
-    } = historyMap[this.props.id] || {}
-    this.setState({stateHistoryList, redoStateHistoryList});
+    const historyMap = (await promisedGetDB('historyMap')) || {};
+    const { stateHistoryList = [], redoStateHistoryList = [] } =
+      historyMap[this.props.id] || {};
+    this.setState({ stateHistoryList, redoStateHistoryList });
   }
 
   render() {
@@ -429,11 +444,15 @@ class Selector extends Component {
       });
     let selectGroup;
     if (this.props.groupList) {
-      selectGroup = [
-        <option value='group'>{GL('group')}</option>
-      ];
+      selectGroup = [<option value='group'>{GL('group')}</option>];
     } else {
-      selectGroup = <option value='not_other_group'>{GL('not_other_group')}</option>;
+      selectGroup = [
+        <option value='not_other_group'>{GL('not_other_group')}</option>,
+        <option value='in_current_group'>{GL('in_current_group')}</option>,
+        <option value='not_in_current_group'>
+          {GL('not_in_current_group')}
+        </option>
+      ];
     }
     let actionBar;
     if (this.props.actionBar) {
@@ -457,23 +476,29 @@ class Selector extends Component {
         );
         if (this.props.withControl === 'group') {
           buttonEnable = (
-            <button onClick={() => this.enable(this.props.selectedList)}>{GL('enable')}</button>
+            <button onClick={() => this.enable(this.state.filterType === 'all' ? this.props.selectedList : undefined)}>
+              {GL('enable')}
+            </button>
           );
           buttonDisable = (
-            <button onClick={() => this.disable(this.props.selectedList)}>{GL('disable')}</button>
+            <button onClick={() => this.disable(this.state.filterType === 'all' ? this.props.selectedList : undefined)}>
+              {GL('disable')}
+            </button>
           );
         } else {
           buttonEnable = (
-            <button onClick={this.enable.bind(this)}>{GL('enable')}</button>
+            <button onClick={() => this.enable()}>{GL('enable')}</button>
           );
           buttonDisable = (
-            <button onClick={this.disable.bind(this)}>{GL('disable')}</button>
+            <button onClick={() => this.disable()}>{GL('disable')}</button>
           );
           buttonNewGroup = (
-            <button onClick={this.newGroup.bind(this)}>{GL('new_group')}</button>
+            <button onClick={this.newGroup.bind(this)}>
+              {GL('new_group')}
+            </button>
           );
         }
-      } 
+      }
       actionBar = (
         <div id='actionBar'>
           <select
@@ -597,7 +622,10 @@ class Selector extends Component {
       />
     );
     return (
-      <SelectorDiv zoom={this.props.zoom} viewMode={this.props.viewMode} withControl={this.props.withControl}>
+      <SelectorDiv
+        zoom={this.props.zoom}
+        viewMode={this.props.viewMode}
+        withControl={this.props.withControl}>
         {actionBar}
         {view}
         {groupDiv}
