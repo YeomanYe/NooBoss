@@ -48,6 +48,8 @@ enabled:
   message: 启用
 disabled:
   message: 禁用
+timer:
+  message: 定时
 development:
   message: 研发中
 offlineEnabled:

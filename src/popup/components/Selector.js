@@ -43,6 +43,9 @@ const SelectorDiv = styled.div`
         props.withControl === 'group' ? '70px' : '80px'};
       margin-top: -3px;
       margin-right: 8px;
+      &:last-child {
+        margin-right: 0;
+      }
     }
     #clearNameFilter {
       display: inline-block;
@@ -456,7 +459,7 @@ class Selector extends Component {
     }
     let actionBar;
     if (this.props.actionBar) {
-      let buttonEnable, buttonDisable, buttonUndo, buttonRedo, buttonNewGroup;
+      let buttonEnable, buttonDisable, buttonUndo, buttonRedo, buttonNewGroup, buttonTimer;
       if (this.props.withControl) {
         buttonUndo = (
           <button
@@ -483,6 +486,11 @@ class Selector extends Component {
           buttonDisable = (
             <button onClick={() => this.disable(this.state.filterType === 'all' ? this.props.selectedList : undefined)}>
               {GL('disable')}
+            </button>
+          );
+          buttonTimer = (
+            <button onClick={() => this.disable(this.state.filterType === 'all' ? this.props.selectedList : undefined)}>
+              {GL('timer')}
             </button>
           );
         } else {
@@ -542,6 +550,7 @@ class Selector extends Component {
           {buttonDisable}
           {buttonUndo}
           {buttonRedo}
+          {buttonTimer}
           {buttonNewGroup}
         </div>
       );

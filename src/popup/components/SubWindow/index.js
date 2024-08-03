@@ -17,7 +17,7 @@ const SubWindowDiv = styled.div`
   background-color: rgba(0, 0, 0, 0.7);
   cursor: pointer;
   #subWindow {
-    width: 80%;
+    width: 90%;
     height: 80%;
     margin: auto;
     background-color: white;
