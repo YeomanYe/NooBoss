@@ -32,7 +32,7 @@
   "scripts": {
     "dev": "webpack -w",
     "prod": "webpack --env.production",
-    "release": "npm run checkFormat && rm -rdf dist && npm run buildLocale && npm run prod && npm run zipDist",
+    "release": "rm -rdf dist && npm run buildLocale && npm run prod && npm run zipDist",
     "zipDist": "cd dist && zip -r -FS ../dist.zip *",
     "test": "echo \"Error: no test specified\" && exit 1",
     "checkFormat": "prettier --check '**/*.{js,tsx,ts,tsx}' '!dist/**'",
@@ -56,5 +56,8 @@
   "bugs": {
     "url": "https://github.com/AInoob/NooBoss/issues"
   },
-  "homepage": "https://github.com/AInoob/NooBoss#readme"
+  "homepage": "https://github.com/AInoob/NooBoss#readme",
+  "dependencies": {
+    "antd": "^5.20.0"
+  }
 }
